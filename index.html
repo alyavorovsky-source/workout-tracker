@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7f9">
+  <meta name="description" content="Простой календарь тренировок">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <title>Тренировки</title>
+  <style>
+    :root{color-scheme:light;--bg:#f6f7f9;--card:#fff;--text:#20242b;--muted:#78808c;--line:#e8ebef;--accent:#3867e8;--accent-soft:#edf2ff;--green:#16845b;--green-soft:#e8f6ef;--shadow:0 8px 28px rgba(25,35,55,.06)}
+    *{box-sizing:border-box}body{margin:0;padding:20px 14px calc(28px + env(safe-area-inset-bottom));background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
+    .app{width:100%;max-width:520px;margin:0 auto}header{margin:8px 2px 20px}h1{margin:0 0 5px;font-size:27px;letter-spacing:-.7px}.subtitle{color:var(--muted);font-size:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+    .monthbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.monthbar h2{margin:0;font-size:18px;font-weight:700}.nav{display:flex;gap:7px}button{border:0;font:inherit;cursor:pointer;touch-action:manipulation}
+    .nav button{width:40px;height:40px;border-radius:13px;background:#f1f3f6;color:#303640;font-size:21px}
+    .weekdays,.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekday{text-align:center;color:var(--muted);font-size:11px;padding:3px 0 8px}
+    .day{position:relative;min-width:0;aspect-ratio:1/1.08;border-radius:12px;background:#f7f8fa;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px 2px 4px;gap:5px;border:1px solid transparent}
+    .day .num{font-size:13px;line-height:1}.day.other{opacity:.28}.day.today{border-color:var(--accent);background:var(--accent-soft)}.day.selected{background:#e9efff;border-color:var(--accent)}
+    .dots{display:flex;gap:3px;min-height:6px;align-items:center}.dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}.dot.abs{background:var(--green)}
+    .day:focus-visible,button:focus-visible{outline:3px solid #9bb4ff;outline-offset:2px}.hint{color:var(--muted);font-size:12px;margin:12px 2px 0;line-height:1.4}
+    .selected-heading{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:13px}.selected-heading h2{margin:0;font-size:17px}.selected-heading span{color:var(--muted);font-size:12px}
+    .workout{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 12px;border:1px solid var(--line);border-radius:14px;margin-top:9px;min-height:58px}
+    .workout-name{font-size:15px;font-weight:600}.workout-state{color:var(--muted);font-size:12px;margin-top:3px}.toggle{flex:0 0 auto;min-width:88px;padding:10px 12px;border-radius:11px;background:#f0f2f5;color:#505865;font-size:13px;font-weight:650}.toggle.done{background:var(--green-soft);color:var(--green)}
+    .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f7f8fa;border-radius:14px;padding:13px}.stat strong{display:block;font-size:22px;margin-bottom:3px}.stat span{color:var(--muted);font-size:12px}
+    .footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 10px 0}.install{display:none;width:100%;padding:13px;border-radius:13px;background:var(--accent);color:white;font-weight:650;margin:0 0 14px}.install.show{display:block}
+    @media(max-width:360px){body{padding-left:10px;padding-right:10px}.card{padding:13px}.weekdays,.calendar{gap:3px}.day{border-radius:9px;padding-top:7px}.toggle{min-width:78px;padding:9px 8px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header><h1>Тренировки</h1><div class="subtitle">Отмечай занятия — прогресс сохранится на этом устройстве.</div></header>
+  <button class="install" id="installBtn">Установить приложение</button>
+  <section class="card" aria-label="Календарь тренировок">
+    <div class="monthbar"><h2 id="monthTitle"></h2><div class="nav"><button id="prevMonth" aria-label="Предыдущий месяц">‹</button><button id="nextMonth" aria-label="Следующий месяц">›</button></div></div>
+    <div class="weekdays" aria-hidden="true"><div class="weekday">ПН</div><div class="weekday">ВТ</div><div class="weekday">СР</div><div class="weekday">ЧТ</div><div class="weekday">ПТ</div><div class="weekday">СБ</div><div class="weekday">ВС</div></div>
+    <div class="calendar" id="calendar"></div><p class="hint">Точки под датой показывают выполненные тренировки. Нажми на день, чтобы отметить занятие.</p>
+  </section>
+  <section class="card"><div class="selected-heading"><h2 id="selectedTitle">Тренировки за день</h2><span id="selectedCount">0 из 2 выполнено</span></div><div id="workouts"></div></section>
+  <section class="card"><div class="summary"><div class="stat"><strong id="monthTotal">0</strong><span>тренировок в этом месяце</span></div><div class="stat"><strong id="activeDays">0</strong><span>активных дней в этом месяце</span></div></div></section>
+  <div class="footer">Работает офлайн · Данные хранятся на этом устройстве</div>
+</main>
+<script>
+const workoutTypes=[{id:"general",name:"Общая тренировка"},{id:"abs",name:"Тренировка на пресс"}];
+const today=new Date();let viewYear=today.getFullYear(),viewMonth=today.getMonth(),selectedDate=dateKey(today),records={};
+try{records=JSON.parse(localStorage.getItem("workout-tracker-v1")||"{}")||{}}catch(_){}
+function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function fromKey(k){const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)}
+function save(){try{localStorage.setItem("workout-tracker-v1",JSON.stringify(records))}catch(_){}}
+function completed(k,id){return !!(records[k]&&records[k][id])}
+function monthName(y,m){return new Intl.DateTimeFormat("ru-RU",{month:"long",year:"numeric"}).format(new Date(y,m,1))}
+function renderCalendar(){
+ document.getElementById("monthTitle").textContent=monthName(viewYear,viewMonth);const grid=document.getElementById("calendar");grid.innerHTML="";
+ const first=new Date(viewYear,viewMonth,1),offset=(first.getDay()+6)%7,start=new Date(viewYear,viewMonth,1-offset);
+ for(let i=0;i<42;i++){const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=dateKey(d),inMonth=d.getMonth()===viewMonth,doneCount=workoutTypes.filter(w=>completed(key,w.id)).length;
+  const btn=document.createElement("button");btn.className="day"+(!inMonth?" other":"")+(key===dateKey(today)?" today":"")+(key===selectedDate?" selected":"");btn.setAttribute("aria-label",`${d.toLocaleDateString("ru-RU")}, выполнено ${doneCount} из 2`);btn.setAttribute("aria-pressed",key===selectedDate?"true":"false");
+  const num=document.createElement("span");num.className="num";num.textContent=d.getDate();const dots=document.createElement("span");dots.className="dots";
+  workoutTypes.forEach(w=>{if(completed(key,w.id)){const dot=document.createElement("i");dot.className="dot"+(w.id==="abs"?" abs":"");dots.appendChild(dot)}});
+  btn.append(num,dots);btn.addEventListener("click",()=>{selectedDate=key;if(!inMonth){viewYear=d.getFullYear();viewMonth=d.getMonth()}render()});grid.appendChild(btn);
+ }
+}
+function renderWorkouts(){
+ const date=fromKey(selectedDate);document.getElementById("selectedTitle").textContent=date.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
+ const count=workoutTypes.filter(w=>completed(selectedDate,w.id)).length;document.getElementById("selectedCount").textContent=`${count} из 2 выполнено`;const c=document.getElementById("workouts");c.innerHTML="";
+ workoutTypes.forEach(w=>{const done=completed(selectedDate,w.id),row=document.createElement("div");row.className="workout";const info=document.createElement("div"),name=document.createElement("div");name.className="workout-name";name.textContent=w.name;const state=document.createElement("div");state.className="workout-state";state.textContent=done?"Отмечено как выполненное":"Пока не выполнено";info.append(name,state);
+  const toggle=document.createElement("button");toggle.className="toggle"+(done?" done":"");toggle.textContent=done?"✓ Готово":"Отметить";toggle.setAttribute("aria-pressed",done?"true":"false");toggle.addEventListener("click",()=>{records[selectedDate]||={};if(records[selectedDate][w.id])delete records[selectedDate][w.id];else records[selectedDate][w.id]=true;if(!Object.keys(records[selectedDate]).length)delete records[selectedDate];save();render()});row.append(info,toggle);c.appendChild(row)
+ })
+}
+function renderStats(){let total=0,days=0;Object.entries(records).forEach(([key,value])=>{const d=fromKey(key);if(d.getFullYear()===viewYear&&d.getMonth()===viewMonth){const n=workoutTypes.filter(w=>value&&value[w.id]).length;total+=n;if(n)days++}});document.getElementById("monthTotal").textContent=total;document.getElementById("activeDays").textContent=days}
+function render(){renderCalendar();renderWorkouts();renderStats()}
+document.getElementById("prevMonth").addEventListener("click",()=>{viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--}render()});
+document.getElementById("nextMonth").addEventListener("click",()=>{viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++}render()});
+let installPrompt;const installBtn=document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();installPrompt=e;installBtn.classList.add("show")});
+installBtn.addEventListener("click",async()=>{if(!installPrompt)return;installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;installBtn.classList.remove("show")});
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}
+render();
+</script>
+</body></html>
