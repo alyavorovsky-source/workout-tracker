@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="./icons/icon-192.png">
   <title>Тренировки</title>
   <style>
-    :root{color-scheme:light;--bg:#f6f7f9;--card:#fff;--text:#20242b;--muted:#78808c;--line:#e8ebef;--accent:#3867e8;--accent-soft:#edf2ff;--green:#16845b;--green-soft:#e8f6ef;--shadow:0 8px 28px rgba(25,35,55,.06)}
+    :root{color-scheme:light;--bg:#f6f7f9;--card:#fff;--text:#20242b;--muted:#78808c;--line:#e8ebef;--accent:#3867e8;--accent-soft:#edf2ff;--green:#16845b;--green-soft:#e8f6ef;--day-done:#d9f2e3;--day-done-line:#bfe6cf;--shadow:0 8px 28px rgba(25,35,55,.06)}
     *{box-sizing:border-box}body{margin:0;padding:20px 14px calc(28px + env(safe-area-inset-bottom));background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
     .app{width:100%;max-width:520px;margin:0 auto}header{margin:8px 2px 20px}h1{margin:0 0 5px;font-size:27px;letter-spacing:-.7px}.subtitle{color:var(--muted);font-size:14px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
@@ -19,14 +19,36 @@
     .weekdays,.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.weekday{text-align:center;color:var(--muted);font-size:11px;padding:3px 0 8px}
     .day{position:relative;min-width:0;aspect-ratio:1/1.08;border-radius:12px;background:#f7f8fa;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px 2px 4px;gap:5px;border:1px solid transparent}
     .day .num{font-size:13px;line-height:1}.day.other{opacity:.28}.day.today{border-color:var(--accent);background:var(--accent-soft)}.day.selected{background:#e9efff;border-color:var(--accent)}
-    .dots{display:flex;gap:3px;min-height:6px;align-items:center}.dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}.dot.abs{background:var(--green)}
-    .day:focus-visible,button:focus-visible{outline:3px solid #9bb4ff;outline-offset:2px}.hint{color:var(--muted);font-size:12px;margin:12px 2px 0;line-height:1.4}
+    .day.active{background:var(--day-done)}.day.active:not(.today):not(.selected){border-color:var(--day-done-line)}.day.active.selected{background:#c9ecd8}
+    .dots{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;min-height:6px;max-width:100%;align-items:center}.dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+    .day:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #9bb4ff;outline-offset:2px}.hint{color:var(--muted);font-size:12px;margin:12px 2px 0;line-height:1.4}
     .selected-heading{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:13px}.selected-heading h2{margin:0;font-size:17px}.selected-heading span{color:var(--muted);font-size:12px}
     .workout{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 12px;border:1px solid var(--line);border-radius:14px;margin-top:9px;min-height:58px}
-    .workout-name{font-size:15px;font-weight:600}.workout-state{color:var(--muted);font-size:12px;margin-top:3px}.toggle{flex:0 0 auto;min-width:88px;padding:10px 12px;border-radius:11px;background:#f0f2f5;color:#505865;font-size:13px;font-weight:650}.toggle.done{background:var(--green-soft);color:var(--green)}
+    .workout-name{font-size:15px;font-weight:600;overflow-wrap:anywhere}.workout-state{color:var(--muted);font-size:12px;margin-top:3px}.toggle{flex:0 0 auto;min-width:88px;padding:10px 12px;border-radius:11px;background:#f0f2f5;color:#505865;font-size:13px;font-weight:650}.toggle.done{background:var(--green-soft);color:var(--green)}
+    .del{background:none;padding:6px 0 0;color:var(--muted);font-size:12px;text-decoration:underline}
+    .add-type{width:100%;margin-top:12px;padding:12px;border-radius:14px;background:none;border:1.5px dashed #cfd5dd;color:var(--accent);font-size:14px;font-weight:650}
+    .add-form{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}.add-form[hidden]{display:none}
+    .add-form input{flex:1 1 100%;min-width:0;padding:12px;border:1px solid #cfd5dd;border-radius:12px;font:inherit;font-size:16px;color:var(--text);background:#fff}
+    .add-form .btn{flex:1 1 0;padding:11px 12px;border-radius:12px;font-size:14px;font-weight:650}.btn.primary{background:var(--accent);color:#fff}.btn.ghost{background:#f0f2f5;color:#505865}
+    .form-err{flex:1 1 100%;margin:0;color:#c0392b;font-size:12px}.form-err:empty{display:none}
     .summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#f7f8fa;border-radius:14px;padding:13px}.stat strong{display:block;font-size:22px;margin-bottom:3px}.stat span{color:var(--muted);font-size:12px}
-    .footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 10px 0}.install{display:none;width:100%;padding:13px;border-radius:13px;background:var(--accent);color:white;font-weight:650;margin:0 0 14px}.install.show{display:block}
-    @media(max-width:360px){body{padding-left:10px;padding-right:10px}.card{padding:13px}.weekdays,.calendar{gap:3px}.day{border-radius:9px;padding-top:7px}.toggle{min-width:78px;padding:9px 8px}}
+    .progress-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}.progress-head h2{margin:0;font-size:17px}
+    .seg{display:flex;background:#f1f3f6;border-radius:11px;padding:3px}.seg button{padding:7px 12px;border-radius:9px;background:none;color:#505865;font-size:12.5px;font-weight:650}.seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(25,35,55,.12)}
+    .chart-sub{color:var(--muted);font-size:12px;margin:0 0 14px;min-height:16px}
+    .chart{display:flex;align-items:flex-end;gap:6px;height:150px;border-bottom:1px solid var(--line)}
+    .col{flex:1 1 0;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+    .col .val{font-size:11px;color:var(--muted);font-weight:650;line-height:1}.col .val.zero{opacity:.45}
+    .stack{width:100%;max-width:30px;display:flex;flex-direction:column-reverse;border-radius:7px 7px 3px 3px;overflow:hidden}.stack.empty{height:3px;background:#e4e8ed;border-radius:2px}.seg-part{width:100%}
+    .labels{display:flex;gap:6px;margin-top:6px}.labels span{flex:1 1 0;min-width:0;text-align:center;font-size:10.5px;color:var(--muted);white-space:nowrap}.labels span.now{color:var(--accent);font-weight:700}
+    .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:14px}.legend span{display:flex;align-items:center;gap:6px;font-size:12px;color:#505865}.legend i{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+    .modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(20,26,38,.45)}.modal[hidden]{display:none}
+    .modal-box{width:100%;max-width:420px;max-height:calc(100vh - 40px);overflow:auto;background:var(--card);border-radius:22px;padding:22px 20px 18px;box-shadow:0 20px 60px rgba(20,26,38,.3)}
+    .modal-box h2{margin:0 0 4px;font-size:20px;letter-spacing:-.4px}.modal-date{color:var(--muted);font-size:12px;margin-bottom:14px}
+    .news{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:10px}.news li{display:flex;gap:11px;align-items:flex-start;font-size:14px;line-height:1.4}
+    .news .ico{flex:0 0 auto;width:30px;height:30px;border-radius:10px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;font-size:16px}.news b{display:block;font-size:14px;margin-bottom:1px}.news span.t{color:var(--muted);font-size:13px}
+    .modal-box .btn{width:100%;padding:13px;border-radius:13px;font-size:15px;font-weight:650}
+    .footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 10px 0;line-height:1.6}.footer .version{opacity:.8}.install{display:none;width:100%;padding:13px;border-radius:13px;background:var(--accent);color:white;font-weight:650;margin:0 0 14px}.install.show{display:block}
+    @media(max-width:360px){body{padding-left:10px;padding-right:10px}.card{padding:13px}.weekdays,.calendar{gap:3px}.day{border-radius:9px;padding-top:7px}.toggle{min-width:78px;padding:9px 8px}.chart,.labels{gap:4px}}
   </style>
 </head>
 <body>
@@ -36,40 +58,131 @@
   <section class="card" aria-label="Календарь тренировок">
     <div class="monthbar"><h2 id="monthTitle"></h2><div class="nav"><button id="prevMonth" aria-label="Предыдущий месяц">‹</button><button id="nextMonth" aria-label="Следующий месяц">›</button></div></div>
     <div class="weekdays" aria-hidden="true"><div class="weekday">ПН</div><div class="weekday">ВТ</div><div class="weekday">СР</div><div class="weekday">ЧТ</div><div class="weekday">ПТ</div><div class="weekday">СБ</div><div class="weekday">ВС</div></div>
-    <div class="calendar" id="calendar"></div><p class="hint">Точки под датой показывают выполненные тренировки. Нажми на день, чтобы отметить занятие.</p>
+    <div class="calendar" id="calendar"></div><p class="hint">Дни с тренировками подсвечены зелёным, цветные точки — выполненные типы. Нажми на день, чтобы отметить занятие.</p>
   </section>
-  <section class="card"><div class="selected-heading"><h2 id="selectedTitle">Тренировки за день</h2><span id="selectedCount">0 из 2 выполнено</span></div><div id="workouts"></div></section>
+  <section class="card">
+    <div class="selected-heading"><h2 id="selectedTitle">Тренировки за день</h2><span id="selectedCount"></span></div>
+    <div id="workouts"></div>
+    <button class="add-type" id="addTypeBtn" type="button">+ Добавить свой тип тренировки</button>
+    <form class="add-form" id="addForm" hidden autocomplete="off">
+      <input id="typeName" type="text" maxlength="40" placeholder="Например: Тренировка на спину" aria-label="Название новой тренировки">
+      <p class="form-err" id="typeErr" role="alert"></p>
+      <button class="btn primary" type="submit">Добавить</button><button class="btn ghost" id="cancelType" type="button">Отмена</button>
+    </form>
+  </section>
   <section class="card"><div class="summary"><div class="stat"><strong id="monthTotal">0</strong><span>тренировок в этом месяце</span></div><div class="stat"><strong id="activeDays">0</strong><span>активных дней в этом месяце</span></div></div></section>
-  <div class="footer">Работает офлайн · Данные хранятся на этом устройстве</div>
+  <section class="card" aria-label="Прогресс тренировок">
+    <div class="progress-head"><h2>Прогресс</h2><div class="seg" role="group" aria-label="Период"><button id="modeWeeks" type="button" class="on" aria-pressed="true">Недели</button><button id="modeMonths" type="button" aria-pressed="false">Месяцы</button></div></div>
+    <p class="chart-sub" id="chartSub"></p>
+    <div class="chart" id="chart" role="img"></div>
+    <div class="labels" id="chartLabels" aria-hidden="true"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+  <div class="footer">Работает офлайн · Данные хранятся на этом устройстве<div class="version" id="appVersion"></div></div>
 </main>
+<div class="modal" id="whatsNew" role="dialog" aria-modal="true" aria-labelledby="newsTitle" hidden>
+  <div class="modal-box">
+    <h2 id="newsTitle"></h2><div class="modal-date" id="newsDate"></div>
+    <ul class="news" id="newsList"></ul>
+    <button class="btn primary" id="newsClose" type="button">Понятно</button>
+  </div>
+</div>
 <script>
-const workoutTypes=[{id:"general",name:"Общая тренировка"},{id:"abs",name:"Тренировка на пресс"}];
-const today=new Date();let viewYear=today.getFullYear(),viewMonth=today.getMonth(),selectedDate=dateKey(today),records={};
-try{records=JSON.parse(localStorage.getItem("workout-tracker-v1")||"{}")||{}}catch(_){}
+const APP_VERSION="1.2.0",APP_DATE="13.11.2026";
+const RECORDS_KEY="workout-tracker-v1",TYPES_KEY="workout-tracker-types-v1",SEEN_KEY="workout-tracker-seen-version";
+const RELEASE_NOTES=[
+ {icon:"💪",title:"Тренировка на бицепс",text:"Новый тип тренировки в списке."},
+ {icon:"➕",title:"Свои типы тренировок",text:"Добавляйте собственные тренировки кнопкой под списком. Ненужные можно удалить."},
+ {icon:"🟩",title:"Подсветка дней",text:"Дни, в которые была хотя бы одна тренировка, окрашены в светло-зелёный."},
+ {icon:"📊",title:"График прогресса",text:"В самом низу — тренировки по неделям и месяцам с разбивкой по типам."}
+];
+const BUILTIN=[{id:"general",name:"Общая тренировка",color:"#3867e8"},{id:"abs",name:"Тренировка на пресс",color:"#16845b"},{id:"biceps",name:"Тренировка на бицепс",color:"#e8833a"}];
+const PALETTE=["#8b5cf6","#e0457b","#0ea5b7","#c28a00","#6b7280","#d9480f"];
+const today=new Date();let viewYear=today.getFullYear(),viewMonth=today.getMonth(),selectedDate=dateKey(today),records={},customTypes=[],chartMode="weeks";
+try{records=JSON.parse(localStorage.getItem(RECORDS_KEY)||"{}")||{}}catch(_){}
+try{const t=JSON.parse(localStorage.getItem(TYPES_KEY)||"[]");if(Array.isArray(t))customTypes=t.filter(x=>x&&typeof x.id==="string"&&typeof x.name==="string").map(x=>({id:x.id,name:x.name,color:typeof x.color==="string"?x.color:PALETTE[0],custom:true}))}catch(_){}
+function types(){return BUILTIN.concat(customTypes)}
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function fromKey(k){const[y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d)}
-function save(){try{localStorage.setItem("workout-tracker-v1",JSON.stringify(records))}catch(_){}}
+function save(){try{localStorage.setItem(RECORDS_KEY,JSON.stringify(records))}catch(_){}}
+function saveTypes(){try{localStorage.setItem(TYPES_KEY,JSON.stringify(customTypes.map(({id,name,color})=>({id,name,color}))))}catch(_){}}
 function completed(k,id){return !!(records[k]&&records[k][id])}
 function monthName(y,m){return new Intl.DateTimeFormat("ru-RU",{month:"long",year:"numeric"}).format(new Date(y,m,1))}
 function renderCalendar(){
- document.getElementById("monthTitle").textContent=monthName(viewYear,viewMonth);const grid=document.getElementById("calendar");grid.innerHTML="";
+ document.getElementById("monthTitle").textContent=monthName(viewYear,viewMonth);const grid=document.getElementById("calendar");grid.innerHTML="";const ts=types();
  const first=new Date(viewYear,viewMonth,1),offset=(first.getDay()+6)%7,start=new Date(viewYear,viewMonth,1-offset);
- for(let i=0;i<42;i++){const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=dateKey(d),inMonth=d.getMonth()===viewMonth,doneCount=workoutTypes.filter(w=>completed(key,w.id)).length;
-  const btn=document.createElement("button");btn.className="day"+(!inMonth?" other":"")+(key===dateKey(today)?" today":"")+(key===selectedDate?" selected":"");btn.setAttribute("aria-label",`${d.toLocaleDateString("ru-RU")}, выполнено ${doneCount} из 2`);btn.setAttribute("aria-pressed",key===selectedDate?"true":"false");
-  const num=document.createElement("span");num.className="num";num.textContent=d.getDate();const dots=document.createElement("span");dots.className="dots";
-  workoutTypes.forEach(w=>{if(completed(key,w.id)){const dot=document.createElement("i");dot.className="dot"+(w.id==="abs"?" abs":"");dots.appendChild(dot)}});
-  btn.append(num,dots);btn.addEventListener("click",()=>{selectedDate=key;if(!inMonth){viewYear=d.getFullYear();viewMonth=d.getMonth()}render()});grid.appendChild(btn);
+ for(let i=0;i<42;i++){const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=dateKey(d),inMonth=d.getMonth()===viewMonth,done=ts.filter(w=>completed(key,w.id));
+  const btn=el("button","day"+(!inMonth?" other":"")+(key===dateKey(today)?" today":"")+(key===selectedDate?" selected":"")+(done.length?" active":""));btn.type="button";btn.setAttribute("aria-label",`${d.toLocaleDateString("ru-RU")}, выполнено ${done.length} из ${ts.length}`);btn.setAttribute("aria-pressed",key===selectedDate?"true":"false");
+  const dots=el("span","dots");done.forEach(w=>{const dot=el("i","dot");dot.style.background=w.color;dots.appendChild(dot)});
+  btn.append(el("span","num",d.getDate()),dots);btn.addEventListener("click",()=>{selectedDate=key;if(!inMonth){viewYear=d.getFullYear();viewMonth=d.getMonth()}render()});grid.appendChild(btn);
  }
 }
 function renderWorkouts(){
- const date=fromKey(selectedDate);document.getElementById("selectedTitle").textContent=date.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
- const count=workoutTypes.filter(w=>completed(selectedDate,w.id)).length;document.getElementById("selectedCount").textContent=`${count} из 2 выполнено`;const c=document.getElementById("workouts");c.innerHTML="";
- workoutTypes.forEach(w=>{const done=completed(selectedDate,w.id),row=document.createElement("div");row.className="workout";const info=document.createElement("div"),name=document.createElement("div");name.className="workout-name";name.textContent=w.name;const state=document.createElement("div");state.className="workout-state";state.textContent=done?"Отмечено как выполненное":"Пока не выполнено";info.append(name,state);
-  const toggle=document.createElement("button");toggle.className="toggle"+(done?" done":"");toggle.textContent=done?"✓ Готово":"Отметить";toggle.setAttribute("aria-pressed",done?"true":"false");toggle.addEventListener("click",()=>{records[selectedDate]||={};if(records[selectedDate][w.id])delete records[selectedDate][w.id];else records[selectedDate][w.id]=true;if(!Object.keys(records[selectedDate]).length)delete records[selectedDate];save();render()});row.append(info,toggle);c.appendChild(row)
+ const ts=types(),date=fromKey(selectedDate);document.getElementById("selectedTitle").textContent=date.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
+ const count=ts.filter(w=>completed(selectedDate,w.id)).length;document.getElementById("selectedCount").textContent=`${count} из ${ts.length} выполнено`;const c=document.getElementById("workouts");c.innerHTML="";
+ ts.forEach(w=>{const done=completed(selectedDate,w.id),row=el("div","workout"),info=el("div"),state=el("div","workout-state",done?"Отмечено как выполненное":"Пока не выполнено");
+  info.append(el("div","workout-name",w.name),state);
+  if(w.custom){const del=el("button","del","Удалить тип");del.type="button";del.addEventListener("click",()=>deleteType(w.id));info.appendChild(del)}
+  const toggle=el("button","toggle"+(done?" done":""),done?"✓ Готово":"Отметить");toggle.type="button";toggle.setAttribute("aria-pressed",done?"true":"false");
+  toggle.addEventListener("click",()=>{records[selectedDate]||={};if(records[selectedDate][w.id])delete records[selectedDate][w.id];else records[selectedDate][w.id]=true;if(!Object.keys(records[selectedDate]).length)delete records[selectedDate];save();render()});
+  row.append(info,toggle);c.appendChild(row)
  })
 }
-function renderStats(){let total=0,days=0;Object.entries(records).forEach(([key,value])=>{const d=fromKey(key);if(d.getFullYear()===viewYear&&d.getMonth()===viewMonth){const n=workoutTypes.filter(w=>value&&value[w.id]).length;total+=n;if(n)days++}});document.getElementById("monthTotal").textContent=total;document.getElementById("activeDays").textContent=days}
-function render(){renderCalendar();renderWorkouts();renderStats()}
+function renderStats(){const ts=types();let total=0,days=0;Object.entries(records).forEach(([key,value])=>{const d=fromKey(key);if(d.getFullYear()===viewYear&&d.getMonth()===viewMonth){const n=ts.filter(w=>value&&value[w.id]).length;total+=n;if(n)days++}});document.getElementById("monthTotal").textContent=total;document.getElementById("activeDays").textContent=days}
+function buckets(){
+ const out=[];
+ if(chartMode==="weeks"){const base=new Date(today.getFullYear(),today.getMonth(),today.getDate()-((today.getDay()+6)%7));
+  for(let i=7;i>=0;i--){const s=new Date(base.getFullYear(),base.getMonth(),base.getDate()-7*i),e=new Date(s.getFullYear(),s.getMonth(),s.getDate()+7);out.push({s,e,label:`${String(s.getDate()).padStart(2,"0")}.${String(s.getMonth()+1).padStart(2,"0")}`,now:i===0})}}
+ else{const fmt=new Intl.DateTimeFormat("ru-RU",{month:"short"});
+  for(let i=5;i>=0;i--){const s=new Date(today.getFullYear(),today.getMonth()-i,1),e=new Date(s.getFullYear(),s.getMonth()+1,1);out.push({s,e,label:fmt.format(s).replace(".",""),now:i===0})}}
+ return out
+}
+function renderChart(){
+ const ts=types(),bs=buckets();
+ bs.forEach(b=>{b.counts={};b.total=0});
+ Object.entries(records).forEach(([key,value])=>{const d=fromKey(key);const b=bs.find(x=>d>=x.s&&d<x.e);if(!b)return;ts.forEach(w=>{if(value&&value[w.id]){b.counts[w.id]=(b.counts[w.id]||0)+1;b.total++}})});
+ const max=Math.max(1,...bs.map(b=>b.total)),H=108,total=bs.reduce((a,b)=>a+b.total,0),avg=(total/bs.length).toLocaleString("ru-RU",{maximumFractionDigits:1});
+ document.getElementById("chartSub").textContent=chartMode==="weeks"?`За 8 недель: ${total} · в среднем ${avg} в неделю`:`За 6 месяцев: ${total} · в среднем ${avg} в месяц`;
+ const chart=document.getElementById("chart"),labels=document.getElementById("chartLabels");chart.innerHTML="";labels.innerHTML="";
+ chart.setAttribute("aria-label",`Тренировки по ${chartMode==="weeks"?"неделям":"месяцам"}: `+bs.map(b=>`${b.label} — ${b.total}`).join(", "));
+ bs.forEach(b=>{const col=el("div","col"),stack=el("div","stack"+(b.total?"":" empty"));
+  if(b.total){stack.style.height=Math.max(8,b.total/max*H)+"px";ts.forEach(w=>{const n=b.counts[w.id];if(n){const p=el("div","seg-part");p.style.background=w.color;p.style.flex=String(n);stack.appendChild(p)}})}
+  col.append(el("span","val"+(b.total?"":" zero"),b.total),stack);chart.appendChild(col);labels.appendChild(el("span",b.now?"now":"",b.label))});
+ const lg=document.getElementById("legend");lg.innerHTML="";ts.forEach(w=>{const s=el("span"),i=el("i");i.style.background=w.color;s.append(i,w.name);lg.appendChild(s)});
+ document.getElementById("modeWeeks").classList.toggle("on",chartMode==="weeks");document.getElementById("modeMonths").classList.toggle("on",chartMode==="months");
+ document.getElementById("modeWeeks").setAttribute("aria-pressed",chartMode==="weeks");document.getElementById("modeMonths").setAttribute("aria-pressed",chartMode==="months");
+}
+function render(){renderCalendar();renderWorkouts();renderStats();renderChart()}
+document.getElementById("appVersion").textContent=`Версия ${APP_VERSION} · ${APP_DATE}`;
+const newsModal=document.getElementById("whatsNew");let newsOpener=null;
+function closeNews(){newsModal.hidden=true;try{localStorage.setItem(SEEN_KEY,APP_VERSION)}catch(_){}if(newsOpener&&newsOpener.focus)newsOpener.focus()}
+function showNews(){
+ document.getElementById("newsTitle").textContent=`Что нового в версии ${APP_VERSION}`;document.getElementById("newsDate").textContent=APP_DATE;
+ const ul=document.getElementById("newsList");ul.innerHTML="";
+ RELEASE_NOTES.forEach(n=>{const li=el("li"),ico=el("div","ico",n.icon),box=el("div"),b=el("b",null,n.title),t=el("span","t",n.text);ico.setAttribute("aria-hidden","true");box.append(b,t);li.append(ico,box);ul.appendChild(li)});
+ newsOpener=document.activeElement;newsModal.hidden=false;document.getElementById("newsClose").focus()}
+document.getElementById("newsClose").addEventListener("click",closeNews);
+newsModal.addEventListener("click",e=>{if(e.target===newsModal)closeNews()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!newsModal.hidden)closeNews()});
+(function checkNews(){let seen=null;try{seen=localStorage.getItem(SEEN_KEY)}catch(_){return}
+ if(seen===APP_VERSION)return;
+ // чистая установка (ничего ещё не отмечено) — не показываем «что нового», просто запоминаем версию
+ if(seen===null&&!Object.keys(records).length&&!customTypes.length){try{localStorage.setItem(SEEN_KEY,APP_VERSION)}catch(_){}return}
+ showNews()})();
+function deleteType(id){const t=customTypes.find(x=>x.id===id);if(!t)return;
+ if(!confirm(`Удалить тип «${t.name}»? Отметки этого типа во всех днях тоже будут удалены.`))return;
+ customTypes=customTypes.filter(x=>x.id!==id);Object.keys(records).forEach(k=>{if(records[k]){delete records[k][id];if(!Object.keys(records[k]).length)delete records[k]}});saveTypes();save();render()}
+const addForm=document.getElementById("addForm"),addBtn=document.getElementById("addTypeBtn"),typeName=document.getElementById("typeName"),typeErr=document.getElementById("typeErr");
+function closeForm(){addForm.hidden=true;addBtn.hidden=false;typeName.value="";typeErr.textContent=""}
+addBtn.addEventListener("click",()=>{addForm.hidden=false;addBtn.hidden=true;typeName.focus()});
+document.getElementById("cancelType").addEventListener("click",closeForm);
+addForm.addEventListener("submit",e=>{e.preventDefault();const name=typeName.value.trim().replace(/\s+/g," ");
+ if(!name){typeErr.textContent="Введите название тренировки";return}
+ if(types().some(t=>t.name.toLowerCase()===name.toLowerCase())){typeErr.textContent="Такая тренировка уже есть";return}
+ customTypes.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name,color:PALETTE[customTypes.length%PALETTE.length],custom:true});saveTypes();closeForm();render()});
+document.getElementById("modeWeeks").addEventListener("click",()=>{chartMode="weeks";renderChart()});
+document.getElementById("modeMonths").addEventListener("click",()=>{chartMode="months";renderChart()});
 document.getElementById("prevMonth").addEventListener("click",()=>{viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--}render()});
 document.getElementById("nextMonth").addEventListener("click",()=>{viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++}render()});
 let installPrompt;const installBtn=document.getElementById("installBtn");
